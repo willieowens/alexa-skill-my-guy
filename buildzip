@@ -1,0 +1,2 @@
+go build
+zip my-guy.zip my-guy
