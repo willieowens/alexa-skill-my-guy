@@ -1,50 +1,35 @@
 package main
 
 import (
-    "fmt"
     "github.com/aws/aws-lambda-go/lambda"
+    "github.com/arienmalec/alexa-go"
 )
 
-type Response struct {
-    Version string  `json:"version"`
-    Body    ResBody `json:"response"`
-}
+func Handler(request alexa.Request) (alexa.Response, error) {
+    var response alexa.Response
+    var err error = nil
 
-type ResBody struct {
-    OutputSpeech     Payload `json:"outputSpeech,omitempty"`
-    ShouldEndSession bool    `json:"shouldEndSession"`
-}
-
-type Payload struct {
-    Type string `json:"type,omitempty"`
-    Text string `json:"text,omitempty"`
-}
-
-func NewResponse(speech string) Response {
-    fmt.Println("Generating NewResponse")
-    resp := Response{
-		Version: "1.0",
-		Body: ResBody{
-			OutputSpeech: Payload{
-				Type: "PlainText",
-				Text: speech,
-			},
-			ShouldEndSession: true,
-		},
+	switch request.Body.Intent.Name {
+	case "JokeIntent":
+		response = handleJoke()
+	case alexa.HelpIntent:
+    default:
+		response = handleHelp()
 	}
-    fmt.Println(resp)
-    return resp
+
+	return response, err
+    //return alexa.NewSimpleResponse("Saying Hello", "I'm your guy!"), nil
 }
 
-func Handler() (Response, error) {
-    fmt.Println("Handler")
-    return NewResponse("I'm your guy!"), nil
+func handleHelp() alexa.Response {
+	return alexa.NewSimpleResponse("Help for My Guy", "I'm your guy. Ask me for a joke.")
+}
+
+func handleJoke() alexa.Response {
+    return alexa.NewSimpleResponse("Joke Response", "My grandfather has the heart of a lion, and lifetime ban at the zoo.")
 }
 
 func main() {
-    fmt.Println("main()")
     // Make the handler available for Remote Procedure Call by AWS Lambda
     lambda.Start(Handler)
-    //Handler()
-    //fmt.Println(NewResponse("Hello"))
 }
